@@ -19,19 +19,19 @@ async function transform(sourceFolder) {
 	pathUtil.delFile(resolve('.postcssrc.js'))
 
 	// 复制一些文件
-	pathUtil.copyFile(path.resolve('./uniapp-template/babel.config.js'), resolve('babel.config.js'))
-	pathUtil.copyFile(path.resolve('./uniapp-template/postcss.config.js'), resolve('postcss.config.js'))
-	pathUtil.copyFile(path.resolve('./uniapp-template/vue.config.js'), resolve('vue.config.js'))
-	pathUtil.copyFolder(path.resolve('./uniapp-template/public'), resolve('public'))
-	pathUtil.copyFile(path.resolve('./uniapp-template/src/uni.scss'), resolve('src/uni.scss'))
-	pathUtil.copyFile(path.resolve('./uniapp-template/src/hackPageLifecycle.js'), resolve('src/hackPageLifecycle.js'))
+	pathUtil.copyFile(path.resolve(__dirname, '../uniapp-template/babel.config.js'), resolve('babel.config.js'))
+	pathUtil.copyFile(path.resolve(__dirname, '../uniapp-template/postcss.config.js'), resolve('postcss.config.js'))
+	pathUtil.copyFile(path.resolve(__dirname, '../uniapp-template/vue.config.js'), resolve('vue.config.js'))
+	pathUtil.copyFolder(path.resolve(__dirname, '../uniapp-template/public'), resolve('public'))
+	pathUtil.copyFile(path.resolve(__dirname, '../uniapp-template/src/uni.scss'), resolve('src/uni.scss'))
+	pathUtil.copyFile(path.resolve(__dirname, '../uniapp-template/src/hackPageLifecycle.js'), resolve('src/hackPageLifecycle.js'))
 
 	// 移动 static 目录
 	pathUtil.copyFolder(resolve('static'), resolve('src/static'))
 	pathUtil.delDir(resolve('static'))
 
 	// 重写 package.json
-	let packageJSON = fs.readJsonSync(path.resolve('./uniapp-template/package.json'))
+	let packageJSON = fs.readJsonSync(path.resolve(__dirname, '../uniapp-template/package.json'))
 	let file_package = resolve('package.json')
 	if (fs.existsSync(file_package)) {
 		let packageJson = fs.readJsonSync(file_package)
@@ -51,7 +51,7 @@ async function transform(sourceFolder) {
 
 	// 构建 pages.json 和 manifest.json
 	let pagesJSON = {}
-	let manifestJSON = fs.readJsonSync(path.resolve('./uniapp-template/src/manifest.json'))
+	let manifestJSON = fs.readJsonSync(path.resolve(__dirname, '../uniapp-template/src/manifest.json'))
 	let file_appJSON = resolve('src/app.json')
 	if (fs.existsSync(file_appJSON)) {
 		let appJSON = fs.readJsonSync(file_appJSON)
@@ -59,6 +59,8 @@ async function transform(sourceFolder) {
 		appJSON.permission && (manifestJSON['mp-weixin'].permission = appJSON.permission)
 		appJSON.window && (pagesJSON.globalStyle = appJSON.window)
 		appJSON.tabBar && (pagesJSON.tabBar = appJSON.tabBar)
+
+		// 处理页面
 		if (Array.isArray(appJSON.pages)) {
 			 pagesJSON.pages = appJSON.pages.map(path => {
 				let pageDir = path.substr(0, path.length - 4)
@@ -67,8 +69,6 @@ async function transform(sourceFolder) {
 				if (fs.existsSync(file_pageConfig)) {
 					pageStyle = fs.readJsonSync(file_pageConfig)
 					pathUtil.delFile(file_pageConfig)
-				} else {
-					log(`${file_pageConfig} not found！`, 'warn')
 				}
 				try {
 					// index.vue => main.vue
@@ -80,6 +80,39 @@ async function transform(sourceFolder) {
 				return {
 					path: path,
 					style: pageStyle
+				}
+			})
+		}
+
+		// 处理分包
+		if (Array.isArray(appJSON.subPackages)) {
+			pagesJSON.subPackages = appJSON.subPackages.map(subPackage => {
+				let pages = []
+				if (Array.isArray(subPackage.pages)) {
+					pages = subPackage.pages.map(path => {
+						let pageDir = path.substr(0, path.length - 4)
+						let pageStyle = {}
+						let file_pageConfig = resolve(`src/${subPackage.root}${pageDir}main.json`)
+						if (fs.existsSync(file_pageConfig)) {
+							pageStyle = fs.readJsonSync(file_pageConfig)
+							pathUtil.delFile(file_pageConfig)
+						}
+						try {
+							// index.vue => main.vue
+							fs.renameSync(resolve(`src/${subPackage.root}${pageDir}index.vue`), resolve(`src/${subPackage.root}${pageDir}main.vue`))
+							// delete main.js
+							pathUtil.delFile(resolve(`src/${subPackage.root}${pageDir}main.js`))
+						} catch(e) {}
+						log(`page ${subPackage.root}${path} convert complete！`)
+						return {
+							path: path,
+							style: pageStyle
+						}
+					})
+				}
+				return {
+					root: subPackage.root,
+					pages: pages
 				}
 			})
 		}

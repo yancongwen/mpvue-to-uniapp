@@ -1,21 +1,24 @@
 {
   "name": "mpvue-to-uniapp",
-  "version": "1.0.0",
-  "description": "mpvue t0 uniapp",
+  "version": "1.0.5",
+  "description": "mpvue to uniapp",
   "main": "index.js",
   "bin": {
-    "mpvue2uniapp": "bin/index"
+    "mpvue2uniapp": "./bin/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "ycwen1119@163.com",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/yancongwen/mpvue-to-uniapp.git"
+  },
+  "homepage": "https://github.com/yancongwen/mpvue-to-uniapp#readme",
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.1",
-    "commander": "^7.2.0"
-  },
-  "devDependencies": {
+    "commander": "^7.2.0",
     "fs-extra": "^10.0.0"
   }
 }
