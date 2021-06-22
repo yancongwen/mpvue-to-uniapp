@@ -1,0 +1,21 @@
+{
+  "name": "mpvue-to-uniapp",
+  "version": "1.0.0",
+  "description": "mpvue t0 uniapp",
+  "main": "index.js",
+  "bin": {
+    "mpvue2uniapp": "bin/index"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "commander": "^7.2.0"
+  },
+  "devDependencies": {
+    "fs-extra": "^10.0.0"
+  }
+}
