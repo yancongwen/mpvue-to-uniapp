@@ -4,7 +4,7 @@
   "description": "mpvue to uniapp",
   "main": "index.js",
   "bin": {
-    "mpvue2uniapp": "./bin/index.js"
+    "m2u": "./bin/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
